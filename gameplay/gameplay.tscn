@@ -1,0 +1,181 @@
+[gd_scene load_steps=24 format=3 uid="uid://cixdrgtcmwsy2"]
+
+[ext_resource type="Script" path="res://gameplay/gameplay.gd" id="1_7tapf"]
+[ext_resource type="Script" path="res://gameplay/actors/pitcher.gd" id="2_u447v"]
+[ext_resource type="PackedScene" uid="uid://dw3s7i62y20la" path="res://gameplay/actors/baseball.tscn" id="3_8ge0j"]
+[ext_resource type="Script" path="res://debug/debug_hit.gd" id="4_dbghit"]
+[ext_resource type="Script" path="res://gameplay/directors/camera_director.gd" id="5_camdir"]
+[ext_resource type="PackedScene" path="res://gameplay/actors/fielder.tscn" id="6_fielder"]
+[ext_resource type="Script" path="res://gameplay/directors/defense_director.gd" id="7_defdir"]
+[ext_resource type="Script" path="res://gameplay/actors/ball_shadow.gd" id="8_ballshadow"]
+[ext_resource type="PackedScene" path="res://gameplay/ui/landing_indicator.tscn" id="9_landind"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aunk2"]
+albedo_color = Color(0.301783, 0.651574, 0, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_ewhy7"]
+material = SubResource("StandardMaterial3D_aunk2")
+size = Vector2(200, 400)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
+size = Vector3(200, 1, 400)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6le00"]
+albedo_color = Color(0.47782, 0.319189, 0.184193, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_gccun"]
+material = SubResource("StandardMaterial3D_6le00")
+top_radius = 2.7
+bottom_radius = 5.5
+height = 0.254
+
+[sub_resource type="BoxMesh" id="BoxMesh_d6r6d"]
+size = Vector3(0.38, 0.1, 0.38)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_020si"]
+albedo_color = Color(0.156517, 0.575233, 0.795969, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_4xsxe"]
+material = SubResource("StandardMaterial3D_020si")
+size = Vector3(120, 3, 0.01)
+
+[sub_resource type="BoxMesh" id="BoxMesh_gqfvk"]
+size = Vector3(1.22, 0.01, 1.83)
+
+[sub_resource type="BoxMesh" id="BoxMesh_lkfc0"]
+size = Vector3(0.43, 0.01, 0.43)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_shadow"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0, 0, 0, 0.4)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_shadow"]
+material = SubResource("StandardMaterial3D_shadow")
+size = Vector2(0.15, 0.15)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ii85r"]
+albedo_color = Color(0.528489, 0.301341, 0.137508, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_51ld1"]
+material = SubResource("StandardMaterial3D_ii85r")
+size = Vector3(0.3, 1.8, 0.3)
+
+[node name="Gameplay" type="Node3D"]
+script = ExtResource("1_7tapf")
+
+[node name="Cameras" type="Node3D" parent="."]
+
+[node name="BatterCam" type="Camera3D" parent="Cameras"]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 1.7832, -3.70162)
+current = true
+
+[node name="FieldingCam" type="Camera3D" parent="Cameras"]
+transform = Transform3D(-1, -8.74228e-08, 4.19982e-14, -8.73498e-08, 0.999165, 0.0408467, -3.57098e-09, 0.0408467, -0.999165, 0, 11.8362, -4)
+
+[node name="Field" type="Node3D" parent="."]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Field"]
+transform = Transform3D(1, 0, 0, 0, -0.0108034, 0.999942, 0, -0.999942, -0.0108034, 0, 100, 0)
+
+[node name="Grass" type="MeshInstance3D" parent="Field"]
+mesh = SubResource("PlaneMesh_ewhy7")
+
+[node name="GroundBody" type="StaticBody3D" parent="Field/Grass"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Field/Grass/GroundBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+shape = SubResource("BoxShape3D_ground")
+
+[node name="PitchersMound" type="MeshInstance3D" parent="Field"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 18.44)
+mesh = SubResource("CylinderMesh_gccun")
+
+[node name="SecondBase" type="MeshInstance3D" parent="Field"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 38.8)
+mesh = SubResource("BoxMesh_d6r6d")
+
+[node name="CenterFieldWall" type="MeshInstance3D" parent="Field"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 120)
+mesh = SubResource("BoxMesh_4xsxe")
+
+[node name="LeftFieldWall" type="MeshInstance3D" parent="Field"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 85, 1.5, 85)
+mesh = SubResource("BoxMesh_4xsxe")
+skeleton = NodePath("../RightFieldWall")
+
+[node name="RightFieldWall" type="MeshInstance3D" parent="Field"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -85, 1.5, 85)
+mesh = SubResource("BoxMesh_4xsxe")
+skeleton = NodePath("../CenterFieldWall")
+
+[node name="LeftBattersBox" type="MeshInstance3D" parent="Field"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.938, 0, -0.45)
+mesh = SubResource("BoxMesh_gqfvk")
+skeleton = NodePath("")
+
+[node name="RightBattersBox" type="MeshInstance3D" parent="Field"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.938, 0, -0.45)
+mesh = SubResource("BoxMesh_gqfvk")
+skeleton = NodePath("")
+
+[node name="HomePlate" type="MeshInstance3D" parent="Field"]
+mesh = SubResource("BoxMesh_lkfc0")
+
+[node name="Actors" type="Node3D" parent="."]
+
+[node name="Baseball" parent="Actors" instance=ExtResource("3_8ge0j")]
+
+[node name="BallShadow" type="MeshInstance3D" parent="Actors" node_paths=PackedStringArray("baseball")]
+cast_shadow = 0
+mesh = SubResource("PlaneMesh_shadow")
+script = ExtResource("8_ballshadow")
+baseball = NodePath("../Baseball")
+
+[node name="Pitcher" type="MeshInstance3D" parent="Actors" node_paths=PackedStringArray("release_point", "baseball")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.86226, 18.44)
+mesh = SubResource("BoxMesh_51ld1")
+script = ExtResource("2_u447v")
+release_point = NodePath("ReleasePoint")
+baseball = NodePath("../Baseball")
+
+[node name="ReleasePoint" type="Node3D" parent="Actors/Pitcher"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0)
+
+[node name="Fielders" type="Node3D" parent="Actors"]
+
+[node name="CenterField" parent="Actors/Fielders" node_paths=PackedStringArray("baseball", "throw_targets") instance=ExtResource("6_fielder")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 80)
+is_player_controlled = true
+baseball = NodePath("../../Baseball")
+throw_targets = [NodePath("../SecondBasePlayer"), NodePath("../Shortstop")]
+
+[node name="Shortstop" type="MeshInstance3D" parent="Actors/Fielders"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.9, 40)
+mesh = SubResource("BoxMesh_51ld1")
+
+[node name="SecondBasePlayer" type="MeshInstance3D" parent="Actors/Fielders"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0.9, 40)
+mesh = SubResource("BoxMesh_51ld1")
+
+[node name="Directors" type="Node" parent="."]
+
+[node name="CameraDirector" type="Node" parent="Directors" node_paths=PackedStringArray("baseball", "pitcher", "batter_cam", "fielding_cam")]
+script = ExtResource("5_camdir")
+baseball = NodePath("../../Actors/Baseball")
+pitcher = NodePath("../../Actors/Pitcher")
+batter_cam = NodePath("../../Cameras/BatterCam")
+fielding_cam = NodePath("../../Cameras/FieldingCam")
+
+[node name="DefenseDirector" type="Node" parent="Directors"]
+script = ExtResource("7_defdir")
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="LandingIndicator" parent="." node_paths=PackedStringArray("baseball", "fielding_cam") instance=ExtResource("9_landind")]
+baseball = NodePath("../Actors/Baseball")
+fielding_cam = NodePath("../Cameras/FieldingCam")
+
+[node name="DebugHit" type="Node" parent="." node_paths=PackedStringArray("baseball")]
+script = ExtResource("4_dbghit")
+baseball = NodePath("../Actors/Baseball")

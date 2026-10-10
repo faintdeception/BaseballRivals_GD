@@ -1,0 +1,23 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://gameplay/actors/fielder.gd" id="1_fielder"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_fielder"]
+size = Vector3(0.8, 1.8, 0.8)
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_fielder"]
+radius = 0.4
+height = 1.8
+
+[node name="Fielder" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("1_fielder")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+mesh = SubResource("BoxMesh_fielder")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_fielder")

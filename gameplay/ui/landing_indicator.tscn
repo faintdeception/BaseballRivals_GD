@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://gameplay/ui/landing_indicator.gd" id="1_landind"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ind"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1, 0.9, 0.1, 0.65)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_ind"]
+material = SubResource("StandardMaterial3D_ind")
+top_radius = 1.0
+bottom_radius = 1.0
+height = 0.01
+radial_segments = 32
+rings = 1
+
+[node name="LandingIndicator" type="MeshInstance3D"]
+visible = false
+cast_shadow = 0
+mesh = SubResource("CylinderMesh_ind")
+script = ExtResource("1_landind")
