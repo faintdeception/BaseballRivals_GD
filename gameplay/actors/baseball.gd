@@ -3,13 +3,15 @@ extends RigidBody3D
 ## Becomes true once the ball touches the ground after being reset; a fielder
 ## can only record an out on a ball that has not.
 var has_touched_ground: bool = false
+## True once the ball has been hit; fielders can't catch a pitch.
+var in_play: bool = false
 ## Ball center at or below this height counts as touching the ground (radius is 0.074).
 @export var ground_touch_height: float = 0.2
 
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	pass # Replace with function body.
+	EventBus.ball_hit.connect(func(ball: RigidBody3D): if ball == self: in_play = true)
 
 
 func _physics_process(_delta):
@@ -28,6 +30,7 @@ func reset_to(pos: Vector3):
 	angular_velocity = Vector3.ZERO
 	visible = true
 	has_touched_ground = false
+	in_play = false
 
 
 func launch(velocity: Vector3):

@@ -40,6 +40,12 @@ signal ball_thrown(fielder: Fielder, ball: RigidBody3D, target: Node3D)
 ## Debug alternative to holding LB on a controller.
 @export var throw_modifier_key: Key = KEY_SHIFT
 @export var throw_key: Key = KEY_SPACE
+## Base targets for Space (Home) and keys 1-4. Unset ones fall back to the sibling
+## fielder with the matching name (FirstBase, SecondBase, ThirdBase, Catcher for home).
+@export var first_base: Node3D
+@export var second_base: Node3D
+@export var third_base: Node3D
+@export var home_plate: Node3D
 
 var has_ball: bool = false
 var _cooldown: float = 0.0
@@ -65,22 +71,32 @@ func _physics_process(delta: float) -> void:
 	_move()
 	if has_ball:
 		baseball.global_position = global_position + Vector3.UP * hold_height
-	elif is_player_controlled:
-		_try_catch()
 	else:
-		_log("not catching: is_player_controlled is false")
+		_try_catch()
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not (is_player_controlled and has_ball):
 		return
-	var pressed := false
+	var target: Node3D = null
 	if event is InputEventKey and event.pressed and not event.echo:
-		pressed = event.physical_keycode == throw_key and Input.is_physical_key_pressed(throw_modifier_key)
-	elif event is InputEventJoypadButton and event.pressed:
-		pressed = event.button_index == JOY_BUTTON_A and Input.is_joy_button_pressed(event.device, JOY_BUTTON_LEFT_SHOULDER)
-	if pressed:
-		throw_ball()
+		match event.physical_keycode:
+			KEY_1: target = _base_target(first_base, "FirstBase")
+			KEY_2: target = _base_target(second_base, "SecondBase")
+			KEY_3: target = _base_target(third_base, "ThirdBase")
+			KEY_4: target = _base_target(home_plate, "Catcher")
+			throw_key:
+				if Input.is_physical_key_pressed(throw_modifier_key):
+					throw_ball()
+					return
+				target = _base_target(home_plate, "Catcher")
+	elif event is InputEventJoypadButton and event.pressed and event.button_index == JOY_BUTTON_A:
+		if Input.is_joy_button_pressed(event.device, JOY_BUTTON_LEFT_SHOULDER):
+			throw_ball()
+			return
+		target = _base_target(home_plate, "Catcher")
+	if target != null:
+		throw_ball(target)
 
 
 func _move() -> void:
@@ -110,6 +126,8 @@ func _try_catch() -> void:
 	if baseball == null:
 		_log("no baseball assigned", true)
 		return
+	if baseball.get("in_play") != true:
+		return
 	if _cooldown > 0.0:
 		_log("rejected: recatch cooldown %.2fs left" % _cooldown)
 		return
@@ -129,6 +147,8 @@ func _try_catch() -> void:
 		return
 	_log(("FIELDED (ground ball); " if on_ground else "CAUGHT (in flight); ") + summary, true)
 	has_ball = true
+	for f: Fielder in get_tree().get_nodes_in_group("fielders"):
+		f.is_player_controlled = (f == self)
 	baseball.freeze = true
 	baseball.linear_velocity = Vector3.ZERO
 	baseball.global_position = global_position + Vector3.UP * hold_height
@@ -140,9 +160,10 @@ func _try_catch() -> void:
 		EventBus.ball_caught.emit(self, baseball)
 
 
-func throw_ball() -> void:
-	var target := _nearest_target()
-	if not has_ball or target == null:
+func throw_ball(target: Node3D = null) -> void:
+	if target == null:
+		target = _nearest_target()
+	if not has_ball or target == null or target == self:
 		return
 	var flat := target.global_position - global_position
 	flat.y = 0.0
@@ -170,3 +191,10 @@ func _nearest_target() -> Node3D:
 			best_dist = d
 			best = t
 	return best
+
+
+func _base_target(exported: Node3D, sibling_name: String) -> Node3D:
+	if exported != null:
+		return exported
+	var parent := get_parent()
+	return parent.get_node_or_null(sibling_name) as Node3D if parent != null else null

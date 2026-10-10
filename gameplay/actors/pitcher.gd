@@ -45,10 +45,7 @@ func _start_pitch():
 	# Get ready for the next pitch first, because a strikeout below sets DONE.
 	timer = time_between_pitches
 	state = State.WAITING
-
-	# TODO: every pitch is a strike for now. Once the strike zone/umpire exists,
-	# it should call GameState.record_strike() or record_ball() instead of the pitcher.
-	GameState.record_strike()
+	# Strikes are now recorded by the batter (whiff); a strike zone/umpire will handle takes later.
 
 
 func _on_strikeout():

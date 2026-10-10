@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://cixdrgtcmwsy2"]
+[gd_scene load_steps=25 format=3 uid="uid://cixdrgtcmwsy2"]
 
 [ext_resource type="Script" path="res://gameplay/gameplay.gd" id="1_7tapf"]
 [ext_resource type="Script" path="res://gameplay/actors/pitcher.gd" id="2_u447v"]
@@ -9,6 +9,7 @@
 [ext_resource type="Script" path="res://gameplay/directors/defense_director.gd" id="7_defdir"]
 [ext_resource type="Script" path="res://gameplay/actors/ball_shadow.gd" id="8_ballshadow"]
 [ext_resource type="PackedScene" path="res://gameplay/ui/landing_indicator.tscn" id="9_landind"]
+[ext_resource type="PackedScene" path="res://gameplay/actors/batter.tscn" id="10_batter"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aunk2"]
 albedo_color = Color(0.301783, 0.651574, 0, 1)
@@ -67,7 +68,7 @@ script = ExtResource("1_7tapf")
 [node name="Cameras" type="Node3D" parent="."]
 
 [node name="BatterCam" type="Camera3D" parent="Cameras"]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 1.7832, -3.70162)
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0.783, -2)
 current = true
 
 [node name="FieldingCam" type="Camera3D" parent="Cameras"]
@@ -142,21 +143,53 @@ baseball = NodePath("../Baseball")
 [node name="ReleasePoint" type="Node3D" parent="Actors/Pitcher"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0)
 
+[node name="Batter" parent="Actors" node_paths=PackedStringArray("baseball", "pitcher") instance=ExtResource("10_batter")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.9, 0, 0)
+baseball = NodePath("../Baseball")
+pitcher = NodePath("../Pitcher")
+
 [node name="Fielders" type="Node3D" parent="Actors"]
 
+[node name="Catcher" parent="Actors/Fielders" node_paths=PackedStringArray("baseball", "throw_targets") instance=ExtResource("6_fielder")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)
+baseball = NodePath("../../Baseball")
+throw_targets = [NodePath("../FirstBase"), NodePath("../SecondBase"), NodePath("../Shortstop"), NodePath("../ThirdBase")]
+
+[node name="FirstBase" parent="Actors/Fielders" node_paths=PackedStringArray("baseball", "throw_targets") instance=ExtResource("6_fielder")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 21)
+baseball = NodePath("../../Baseball")
+throw_targets = [NodePath("../SecondBase"), NodePath("../Shortstop"), NodePath("../ThirdBase")]
+
+[node name="SecondBase" parent="Actors/Fielders" node_paths=PackedStringArray("baseball", "throw_targets") instance=ExtResource("6_fielder")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 33)
+baseball = NodePath("../../Baseball")
+throw_targets = [NodePath("../FirstBase"), NodePath("../Shortstop"), NodePath("../ThirdBase")]
+
+[node name="Shortstop" parent="Actors/Fielders" node_paths=PackedStringArray("baseball", "throw_targets") instance=ExtResource("6_fielder")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0, 33)
+baseball = NodePath("../../Baseball")
+throw_targets = [NodePath("../FirstBase"), NodePath("../SecondBase"), NodePath("../ThirdBase")]
+
+[node name="ThirdBase" parent="Actors/Fielders" node_paths=PackedStringArray("baseball", "throw_targets") instance=ExtResource("6_fielder")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0, 21)
+baseball = NodePath("../../Baseball")
+throw_targets = [NodePath("../FirstBase"), NodePath("../SecondBase"), NodePath("../Shortstop")]
+
+[node name="LeftField" parent="Actors/Fielders" node_paths=PackedStringArray("baseball", "throw_targets") instance=ExtResource("6_fielder")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35, 0, 60)
+baseball = NodePath("../../Baseball")
+throw_targets = [NodePath("../FirstBase"), NodePath("../SecondBase"), NodePath("../Shortstop"), NodePath("../ThirdBase")]
+
 [node name="CenterField" parent="Actors/Fielders" node_paths=PackedStringArray("baseball", "throw_targets") instance=ExtResource("6_fielder")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 80)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 75)
 is_player_controlled = true
 baseball = NodePath("../../Baseball")
-throw_targets = [NodePath("../SecondBasePlayer"), NodePath("../Shortstop")]
+throw_targets = [NodePath("../FirstBase"), NodePath("../SecondBase"), NodePath("../Shortstop"), NodePath("../ThirdBase")]
 
-[node name="Shortstop" type="MeshInstance3D" parent="Actors/Fielders"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.9, 40)
-mesh = SubResource("BoxMesh_51ld1")
-
-[node name="SecondBasePlayer" type="MeshInstance3D" parent="Actors/Fielders"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0.9, 40)
-mesh = SubResource("BoxMesh_51ld1")
+[node name="RightField" parent="Actors/Fielders" node_paths=PackedStringArray("baseball", "throw_targets") instance=ExtResource("6_fielder")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35, 0, 60)
+baseball = NodePath("../../Baseball")
+throw_targets = [NodePath("../FirstBase"), NodePath("../SecondBase"), NodePath("../Shortstop"), NodePath("../ThirdBase")]
 
 [node name="Directors" type="Node" parent="."]
 
