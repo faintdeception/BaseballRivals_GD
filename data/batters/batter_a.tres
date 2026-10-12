@@ -5,8 +5,10 @@
 [resource]
 script = ExtResource("1_data")
 display_name = "Batter A"
+jersey_number = 1
 body_color = Color(0.8, 0.2, 0.2, 1)
-swing_radius_x = 0
-swing_radius_y = 0
+swing_radius_x = 0.0
+swing_radius_y = 0.0
+contact_center_y = 0.75
 contact_speed = 30.0
-swing_duration = 0.15
+swing_trigger_z = 3.0

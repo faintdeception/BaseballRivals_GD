@@ -20,6 +20,11 @@ var data: BatterData
 
 func _ready():
 	data = RosterManager.get_batter(GameState.current_batter_index)
+	if data == null:
+		push_error("Batter: no BatterData for index %d" % GameState.current_batter_index)
+		return
+	if data.swing_trigger_z == 0.0:
+		push_warning("Batter '%s' has swing_trigger_z = 0; the .tres is probably missing fields." % data.display_name)
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = data.body_color
 	body_mesh.material_override = mat
@@ -53,7 +58,9 @@ func _swing():
 	_animate_swing()
 	var offset = baseball.global_position - plate_position
 	if absf(offset.x) < data.swing_radius_x and absf(offset.y - data.contact_center_y) <= data.swing_radius_y:
-		baseball.launch(Vector3(0, 0.2, 1) * data.contact_speed)
+		var angle := deg_to_rad(data.launch_angle_degrees)
+		var dir := Vector3(0.0, sin(angle), cos(angle))
+		baseball.launch(dir * data.contact_speed)
 		EventBus.ball_hit.emit(baseball)
 	else:
 		GameState.record_strike()

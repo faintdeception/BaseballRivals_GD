@@ -10,3 +10,5 @@ extends Resource
 @export var contact_center_y: float
 @export var contact_speed: float
 @export var swing_trigger_z: float
+## Contact launch angle in degrees. 0 = flat line drive, 30 = lazy fly, 45 = popup.
+@export var launch_angle_degrees: float = 12.0
