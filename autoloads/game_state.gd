@@ -4,6 +4,7 @@ signal count_changed(balls: int, strikes: int)
 signal strikeout
 signal play_state_changed(new_state)
 signal bases_changed
+signal outs_changed(new_outs: int)
 
 enum PlayState { IDLE, LIVE, DEAD }
 
@@ -66,6 +67,7 @@ func _on_play_state_changed(new_state: PlayState) -> void:
 func _on_ball_caught(_fielder: Node3D, _ball: RigidBody3D) -> void:
 	outs += 1
 	print("Out ", outs)
+	outs_changed.emit(outs)
 	_set_play_state(PlayState.DEAD)
 
 

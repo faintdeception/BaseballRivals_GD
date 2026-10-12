@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=3 uid="uid://cixdrgtcmwsy2"]
+[gd_scene load_steps=28 format=3 uid="uid://cixdrgtcmwsy2"]
 
 [ext_resource type="Script" path="res://gameplay/gameplay.gd" id="1_7tapf"]
 [ext_resource type="Script" path="res://gameplay/actors/pitcher.gd" id="2_u447v"]
@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" path="res://gameplay/actors/batter.tscn" id="10_batter"]
 [ext_resource type="PackedScene" path="res://gameplay/actors/runner.tscn" id="11_runner"]
 [ext_resource type="Script" path="res://gameplay/directors/base_manager.gd" id="12_basemanager"]
+[ext_resource type="PackedScene" path="res://gameplay/ui/score_hud.tscn" id="13_scorehud"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aunk2"]
 albedo_color = Color(0.301783, 0.651574, 0, 1)
@@ -225,6 +226,8 @@ second_base = NodePath("../../Field/BasePositions/SecondBase")
 third_base = NodePath("../../Field/BasePositions/ThirdBase")
 
 [node name="UI" type="CanvasLayer" parent="."]
+
+[node name="ScoreHud" parent="UI" instance=ExtResource("13_scorehud")]
 
 [node name="LandingIndicator" parent="." node_paths=PackedStringArray("baseball", "fielding_cam") instance=ExtResource("9_landind")]
 baseball = NodePath("../Actors/Baseball")

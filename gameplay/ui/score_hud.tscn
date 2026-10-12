@@ -1,0 +1,21 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://gameplay/ui/score_hud.gd" id="1_hud"]
+
+[node name="ScoreHud" type="CanvasLayer"]
+script = ExtResource("1_hud")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 200.0
+offset_bottom = 42.0
+theme_override_constants/separation = 16
+
+[node name="ScoreLabel" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+text = "Score: 0"
+
+[node name="OutsLabel" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+text = "Outs: 0"
