@@ -1,10 +1,12 @@
 extends Node
 
-signal count_changed(balls: int, strikes: int)
+signal balls_changed(new_balls: int)
+signal strikes_changed(new_strikes: int)
 signal strikeout
 signal play_state_changed(new_state)
 signal bases_changed
 signal outs_changed(new_outs: int)
+signal inning_changed(new_inning: int)
 
 enum PlayState { IDLE, LIVE, DEAD }
 
@@ -12,6 +14,9 @@ var play_state: PlayState = PlayState.IDLE
 var balls: int = 0
 var strikes: int = 0
 var outs: int = 0
+var inning: int = 1
+var home_team_name: String = "HOME"
+var away_team_name: String = "AWAY"
 const LINEUP_SIZE := 9
 
 var lineup: Array[BatterData] = []
@@ -79,25 +84,24 @@ func _on_ball_caught(_fielder: Node3D, _ball: RigidBody3D) -> void:
 func reset_count():
 	balls = 0
 	strikes = 0
-	count_changed.emit(balls, strikes)
+	balls_changed.emit(balls)
+	strikes_changed.emit(strikes)
 
 
 func record_strike():
 	strikes += 1
 	print("Strike ", strikes)
+	strikes_changed.emit(strikes)
 	if strikes >= 3:
 		_strikeout()
-	else:
-		count_changed.emit(balls, strikes)
 
 
 func record_ball():
 	balls += 1
 	print("Ball ", balls)
+	balls_changed.emit(balls)
 	if balls >= 4:
 		_walk()
-	else:
-		count_changed.emit(balls, strikes)
 
 
 func advance_batter():
@@ -147,6 +151,8 @@ func _strikeout():
 
 func _end_inning() -> void:
 	print("Inning ended")
+	inning += 1
+	inning_changed.emit(inning)
 	bases = [null, null, null]
 	bases_changed.emit()
 	_inning_reset_pending = true

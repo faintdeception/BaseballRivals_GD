@@ -1,21 +1,27 @@
 extends CanvasLayer
 
-@onready var outs_label: Label = $HBoxContainer/OutsLabel if has_node("HBoxContainer/OutsLabel") else $OutsLabel
-@onready var score_label: Label = $HBoxContainer/ScoreLabel if has_node("HBoxContainer/ScoreLabel") else $ScoreLabel
+@onready var team_label: Label = $PanelContainer/HBoxContainer/TeamLabel
+@onready var score_label: Label = $PanelContainer/HBoxContainer/ScoreLabel
+@onready var balls_label: Label = $PanelContainer/HBoxContainer/BallsLabel
+@onready var strikes_label: Label = $PanelContainer/HBoxContainer/StrikesLabel
+@onready var outs_label: Label = $PanelContainer/HBoxContainer/OutsLabel
 
 
 func _ready() -> void:
+	GameState.balls_changed.connect(_on_count_changed)
+	GameState.strikes_changed.connect(_on_count_changed)
 	GameState.bases_changed.connect(_refresh)
-	GameState.outs_changed.connect(_on_outs_changed)
+	GameState.outs_changed.connect(_on_count_changed)
 	_refresh()
 
 
-func _on_outs_changed(_new_outs: int) -> void:
+func _on_count_changed(_new_value: int) -> void:
 	_refresh()
 
 
 func _refresh() -> void:
-	if outs_label:
-		outs_label.text = "Outs: %d" % GameState.outs
-	if score_label:
-		score_label.text = "Score: %d" % GameState.score
+	team_label.text = GameState.home_team_name
+	score_label.text = str(GameState.score)
+	balls_label.text = "B:%d" % GameState.balls
+	strikes_label.text = "S:%d" % GameState.strikes
+	outs_label.text = "O:%d" % GameState.outs

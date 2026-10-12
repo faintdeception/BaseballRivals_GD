@@ -1,21 +1,49 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://gameplay/ui/score_hud.gd" id="1_hud"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_scorebug"]
+bg_color = Color(0.035, 0.055, 0.08, 0.92)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 10.0
+content_margin_top = 6.0
+content_margin_right = 10.0
+content_margin_bottom = 6.0
 
 [node name="ScoreHud" type="CanvasLayer"]
 script = ExtResource("1_hud")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="."]
+[node name="PanelContainer" type="PanelContainer" parent="."]
 offset_left = 16.0
 offset_top = 16.0
-offset_right = 200.0
-offset_bottom = 42.0
-theme_override_constants/separation = 16
+theme_override_styles/panel = SubResource("StyleBoxFlat_scorebug")
 
-[node name="ScoreLabel" type="Label" parent="HBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer"]
 layout_mode = 2
-text = "Score: 0"
+theme_override_constants/separation = 12
 
-[node name="OutsLabel" type="Label" parent="HBoxContainer"]
+[node name="TeamLabel" type="Label" parent="PanelContainer/HBoxContainer"]
 layout_mode = 2
-text = "Outs: 0"
+theme_override_colors/font_color = Color(0.48, 0.82, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "HOME"
+
+[node name="ScoreLabel" type="Label" parent="PanelContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "0"
+
+[node name="BallsLabel" type="Label" parent="PanelContainer/HBoxContainer"]
+layout_mode = 2
+text = "B:0"
+
+[node name="StrikesLabel" type="Label" parent="PanelContainer/HBoxContainer"]
+layout_mode = 2
+text = "S:0"
+
+[node name="OutsLabel" type="Label" parent="PanelContainer/HBoxContainer"]
+layout_mode = 2
+text = "O:0"
