@@ -28,6 +28,10 @@ func _on_strikeout() -> void:
 	_set_play_state(PlayState.DEAD)
 
 
+func end_play() -> void:
+	_set_play_state(PlayState.DEAD)
+
+
 func _set_play_state(new_state: PlayState) -> void:
 	if play_state == new_state:
 		return

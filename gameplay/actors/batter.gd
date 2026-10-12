@@ -1,7 +1,11 @@
 extends Node3D
 
+signal reached_first
+
 @export var baseball: RigidBody3D
 @export var pitcher: Node3D
+@export var run_speed_mps: float = 6.5
+@export var first_base_target: Node3D
 ## Center of the contact box (home plate).
 @export var plate_position: Vector3 = Vector3.ZERO
 
@@ -15,10 +19,15 @@ extends Node3D
 
 var has_swung: bool = false
 var swing_tween: Tween
+var run_tween: Tween
 var data: BatterData
+var _box_position: Vector3
+var _is_running: bool = false
+var _has_started_running: bool = false
 
 
 func _ready():
+	_box_position = global_position
 	data = RosterManager.get_batter(GameState.current_batter_index)
 	if data == null:
 		push_error("Batter: no BatterData for index %d" % GameState.current_batter_index)
@@ -29,14 +38,55 @@ func _ready():
 	mat.albedo_color = data.body_color
 	body_mesh.material_override = mat
 	pitcher.ball_pitched.connect(_on_ball_pitched)
+	EventBus.ball_hit.connect(_on_ball_hit)
+	EventBus.ball_caught.connect(_on_ball_caught)
 	bat_pivot.rotation_degrees.y = bat_ready_angle
 
 
 func _on_ball_pitched(_ball: RigidBody3D):
 	has_swung = false
+	_has_started_running = false
 	if swing_tween:
 		swing_tween.kill()
 	bat_pivot.rotation_degrees.y = bat_ready_angle
+
+
+func _on_ball_hit(ball: RigidBody3D) -> void:
+	if ball != baseball or _has_started_running:
+		return
+	if first_base_target == null:
+		push_error("Batter: first_base_target is not assigned")
+		return
+	if run_speed_mps <= 0.0:
+		push_error("Batter: run_speed_mps must be greater than zero")
+		return
+
+	_has_started_running = true
+	_is_running = true
+	var distance := global_position.distance_to(first_base_target.global_position)
+	var duration := distance / run_speed_mps
+	run_tween = create_tween()
+	run_tween.set_trans(Tween.TRANS_LINEAR)
+	run_tween.tween_property(self, "global_position",
+			first_base_target.global_position, duration)
+	run_tween.tween_callback(_on_reached_first)
+
+
+func _on_ball_caught(_fielder: Node3D, ball: RigidBody3D) -> void:
+	if ball != baseball or not _is_running:
+		return
+	if run_tween:
+		run_tween.kill()
+	run_tween = null
+	_is_running = false
+	global_position = _box_position
+
+
+func _on_reached_first() -> void:
+	run_tween = null
+	_is_running = false
+	reached_first.emit()
+	GameState.end_play()
 
 
 func _animate_swing():

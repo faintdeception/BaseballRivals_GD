@@ -143,10 +143,11 @@ baseball = NodePath("../Baseball")
 [node name="ReleasePoint" type="Node3D" parent="Actors/Pitcher"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0)
 
-[node name="Batter" parent="Actors" node_paths=PackedStringArray("baseball", "pitcher") instance=ExtResource("10_batter")]
+[node name="Batter" parent="Actors" node_paths=PackedStringArray("baseball", "pitcher", "first_base_target") instance=ExtResource("10_batter")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.9, 0, 0)
 baseball = NodePath("../Baseball")
 pitcher = NodePath("../Pitcher")
+first_base_target = NodePath("../Fielders/FirstBase")
 
 [node name="Fielders" type="Node3D" parent="Actors"]
 
