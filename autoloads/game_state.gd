@@ -3,6 +3,7 @@ extends Node
 signal count_changed(balls: int, strikes: int)
 signal strikeout
 signal play_state_changed(new_state)
+signal bases_changed
 
 enum PlayState { IDLE, LIVE, DEAD }
 
@@ -14,6 +15,8 @@ const LINEUP_SIZE := 9
 
 var lineup: Array[BatterData] = []
 var lineup_index: int = 0
+var bases: Array[BatterData] = [null, null, null]
+var score: int = 0
 
 
 func _ready() -> void:
@@ -96,6 +99,31 @@ func advance_batter():
 
 func advance_lineup():
 	lineup_index = (lineup_index + 1) % lineup.size()
+
+
+func commit_advancement(batter: BatterData) -> void:
+	if batter == null:
+		push_error("GameState: cannot commit advancement without BatterData")
+		return
+
+	if bases[2] != null:
+		score += 1
+	bases[2] = bases[1]
+	bases[1] = bases[0]
+	bases[0] = batter
+	print("[BaseState] bases: %s %s %s score: %d" % [
+		_format_base_entry(bases[0]),
+		_format_base_entry(bases[1]),
+		_format_base_entry(bases[2]),
+		score,
+	])
+	bases_changed.emit()
+
+
+func _format_base_entry(batter: BatterData) -> String:
+	if batter == null:
+		return "[]"
+	return "[BatterData %s]" % batter.display_name
 
 
 func _strikeout():

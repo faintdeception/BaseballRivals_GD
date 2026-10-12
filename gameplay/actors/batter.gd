@@ -84,6 +84,12 @@ func _on_ball_caught(_fielder: Node3D, ball: RigidBody3D) -> void:
 func _on_reached_first() -> void:
 	run_tween = null
 	_is_running = false
+	if data == null:
+		push_error("Batter: cannot commit advancement without BatterData")
+		return
+	GameState.commit_advancement(data)
+	body_mesh.visible = false
+	bat_pivot.visible = false
 	reached_first.emit()
 	GameState.end_play()
 

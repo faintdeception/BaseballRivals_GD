@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3 uid="uid://cixdrgtcmwsy2"]
+[gd_scene load_steps=27 format=3 uid="uid://cixdrgtcmwsy2"]
 
 [ext_resource type="Script" path="res://gameplay/gameplay.gd" id="1_7tapf"]
 [ext_resource type="Script" path="res://gameplay/actors/pitcher.gd" id="2_u447v"]
@@ -10,6 +10,8 @@
 [ext_resource type="Script" path="res://gameplay/actors/ball_shadow.gd" id="8_ballshadow"]
 [ext_resource type="PackedScene" path="res://gameplay/ui/landing_indicator.tscn" id="9_landind"]
 [ext_resource type="PackedScene" path="res://gameplay/actors/batter.tscn" id="10_batter"]
+[ext_resource type="PackedScene" path="res://gameplay/actors/runner.tscn" id="11_runner"]
+[ext_resource type="Script" path="res://gameplay/directors/base_manager.gd" id="12_basemanager"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aunk2"]
 albedo_color = Color(0.301783, 0.651574, 0, 1)
@@ -95,6 +97,17 @@ mesh = SubResource("CylinderMesh_gccun")
 [node name="SecondBase" type="MeshInstance3D" parent="Field"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 38.8)
 mesh = SubResource("BoxMesh_d6r6d")
+
+[node name="BasePositions" type="Node3D" parent="Field"]
+
+[node name="FirstBase" type="Node3D" parent="Field/BasePositions"]
+position = Vector3(-20, 0, 21)
+
+[node name="SecondBase" type="Node3D" parent="Field/BasePositions"]
+position = Vector3(0, 0, 38.8)
+
+[node name="ThirdBase" type="Node3D" parent="Field/BasePositions"]
+position = Vector3(20, 0, 21)
 
 [node name="CenterFieldWall" type="MeshInstance3D" parent="Field"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 120)
@@ -203,6 +216,13 @@ fielding_cam = NodePath("../../Cameras/FieldingCam")
 
 [node name="DefenseDirector" type="Node" parent="Directors"]
 script = ExtResource("7_defdir")
+
+[node name="BaseManager" type="Node3D" parent="Directors" node_paths=PackedStringArray("first_base", "second_base", "third_base")]
+script = ExtResource("12_basemanager")
+runner_scene = ExtResource("11_runner")
+first_base = NodePath("../../Field/BasePositions/FirstBase")
+second_base = NodePath("../../Field/BasePositions/SecondBase")
+third_base = NodePath("../../Field/BasePositions/ThirdBase")
 
 [node name="UI" type="CanvasLayer" parent="."]
 
