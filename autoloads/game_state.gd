@@ -32,6 +32,10 @@ func end_play() -> void:
 	_set_play_state(PlayState.DEAD)
 
 
+func start_at_bat() -> void:
+	_set_play_state(PlayState.IDLE)
+
+
 func _set_play_state(new_state: PlayState) -> void:
 	if play_state == new_state:
 		return

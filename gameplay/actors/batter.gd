@@ -45,7 +45,6 @@ func _ready():
 
 func _on_ball_pitched(_ball: RigidBody3D):
 	has_swung = false
-	_has_started_running = false
 	if swing_tween:
 		swing_tween.kill()
 	bat_pivot.rotation_degrees.y = bat_ready_angle
@@ -97,6 +96,8 @@ func _animate_swing():
 
 
 func _physics_process(_delta):
+	if GameState.play_state != GameState.PlayState.IDLE:
+		return
 	if has_swung or baseball.freeze or baseball.in_play:
 		return
 	if baseball.global_position.z <= data.swing_trigger_z:

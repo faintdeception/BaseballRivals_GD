@@ -24,6 +24,8 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
+	if GameState.play_state != GameState.PlayState.IDLE:
+		return
 	match state:
 		State.WAITING:
 			timer -= delta
@@ -34,6 +36,8 @@ func _process(delta):
 
 
 func _start_pitch():
+	if GameState.play_state != GameState.PlayState.IDLE:
+		return
 	state = State.PITCHING
 	# TODO: windup animation
 	#var ball = ball_scene.instantiate()
