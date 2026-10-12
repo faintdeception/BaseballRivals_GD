@@ -6,6 +6,7 @@ signal strikeout
 var balls: int = 0
 var strikes: int = 0
 var outs: int = 0
+var current_batter_index: int = 0
 
 
 func _ready() -> void:
@@ -41,11 +42,18 @@ func record_ball():
 		count_changed.emit(balls, strikes)
 
 
+func advance_batter():
+	current_batter_index += 1
+
+
 func _strikeout():
 	print("Strikeout")
 	# Emit before resetting so listeners can tell the at-bat ended.
 	strikeout.emit()
 	reset_count()
+	await get_tree().create_timer(1.5).timeout
+	advance_batter()
+	get_tree().change_scene_to_file("res://gameplay/ui/transition.tscn")
 
 
 func _walk():

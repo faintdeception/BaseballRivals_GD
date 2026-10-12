@@ -1,11 +1,11 @@
 extends Node
 
+# Autoloads have no scene, so the resources are assigned as export defaults rather than in the Inspector.
+@export var batters: Array[BatterData] = [
+	preload("res://data/batters/batter_a.tres"),
+	preload("res://data/batters/batter_b.tres"),
+]
 
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	pass # Replace with function body.
 
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
+func get_batter(index: int) -> BatterData:
+	return batters[index % batters.size()]
