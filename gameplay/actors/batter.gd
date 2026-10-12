@@ -28,9 +28,9 @@ var _has_started_running: bool = false
 
 func _ready():
 	_box_position = global_position
-	data = RosterManager.get_batter(GameState.current_batter_index)
+	data = GameState.lineup[GameState.lineup_index]
 	if data == null:
-		push_error("Batter: no BatterData for index %d" % GameState.current_batter_index)
+		push_error("Batter: no BatterData for lineup index %d" % GameState.lineup_index)
 		return
 	if data.swing_trigger_z == 0.0:
 		push_warning("Batter '%s' has swing_trigger_z = 0; the .tres is probably missing fields." % data.display_name)

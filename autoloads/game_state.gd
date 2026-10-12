@@ -10,10 +10,15 @@ var play_state: PlayState = PlayState.IDLE
 var balls: int = 0
 var strikes: int = 0
 var outs: int = 0
-var current_batter_index: int = 0
+const LINEUP_SIZE := 9
+
+var lineup: Array[BatterData] = []
+var lineup_index: int = 0
 
 
 func _ready() -> void:
+	for i in LINEUP_SIZE:
+		lineup.append(RosterManager.get_batter(i))
 	EventBus.ball_hit.connect(_on_ball_hit)
 	EventBus.ball_caught.connect(_on_ball_caught)
 	strikeout.connect(_on_strikeout)
@@ -86,7 +91,11 @@ func record_ball():
 
 
 func advance_batter():
-	current_batter_index += 1
+	advance_lineup()
+
+
+func advance_lineup():
+	lineup_index = (lineup_index + 1) % lineup.size()
 
 
 func _strikeout():
