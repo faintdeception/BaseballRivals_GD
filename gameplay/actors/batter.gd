@@ -121,3 +121,11 @@ func _swing():
 		EventBus.ball_hit.emit(baseball)
 	else:
 		GameState.record_strike()
+
+
+## Strike zone in world space, anchored to home plate rather than the (possibly running) batter.
+func get_strike_zone() -> AABB:
+	return AABB(
+		plate_position + Vector3(-data.zone_half_width, data.zone_bottom_y, -0.1),
+		Vector3(data.zone_half_width * 2.0, data.zone_top_y - data.zone_bottom_y, 0.2)
+	)

@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" path="res://gameplay/actors/runner.tscn" id="11_runner"]
 [ext_resource type="Script" path="res://gameplay/directors/base_manager.gd" id="12_basemanager"]
 [ext_resource type="PackedScene" path="res://gameplay/ui/score_hud.tscn" id="13_scorehud"]
+[ext_resource type="PackedScene" path="res://gameplay/ui/strike_zone.tscn" id="14_strikezone"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aunk2"]
 albedo_color = Color(0.301783, 0.651574, 0, 1)
@@ -236,3 +237,9 @@ fielding_cam = NodePath("../Cameras/FieldingCam")
 [node name="DebugHit" type="Node" parent="." node_paths=PackedStringArray("baseball")]
 script = ExtResource("4_dbghit")
 baseball = NodePath("../Actors/Baseball")
+
+[node name="StrikeZone" parent="." instance=ExtResource("14_strikezone")]
+
+[node name="Zone" parent="StrikeZone" index="0" node_paths=PackedStringArray("batter_cam", "batter")]
+batter_cam = NodePath("../../Cameras/BatterCam")
+batter = NodePath("../../Actors/Batter")
