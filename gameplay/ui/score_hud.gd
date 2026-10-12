@@ -12,6 +12,7 @@ func _ready() -> void:
 	GameState.strikes_changed.connect(_on_count_changed)
 	GameState.bases_changed.connect(_refresh)
 	GameState.outs_changed.connect(_on_count_changed)
+	GameState.batting_team_changed.connect(_refresh)
 	_refresh()
 
 
@@ -20,8 +21,8 @@ func _on_count_changed(_new_value: int) -> void:
 
 
 func _refresh() -> void:
-	team_label.text = GameState.home_team_name
-	score_label.text = str(GameState.score)
+	team_label.text = GameState.current_team_name()
+	score_label.text = str(GameState.current_team_score())
 	balls_label.text = "B:%d" % GameState.balls
 	strikes_label.text = "S:%d" % GameState.strikes
 	outs_label.text = "O:%d" % GameState.outs

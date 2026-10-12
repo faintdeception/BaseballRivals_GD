@@ -7,6 +7,7 @@ signal play_state_changed(new_state)
 signal bases_changed
 signal outs_changed(new_outs: int)
 signal inning_changed(new_inning: int)
+signal batting_team_changed
 
 enum PlayState { IDLE, LIVE, DEAD }
 
@@ -17,12 +18,14 @@ var outs: int = 0
 var inning: int = 1
 var home_team_name: String = "HOME"
 var away_team_name: String = "AWAY"
+var is_home_batting: bool = true
 const LINEUP_SIZE := 9
 
 var lineup: Array[BatterData] = []
 var lineup_index: int = 0
 var bases: Array[BatterData] = [null, null, null]
-var score: int = 0
+var home_score: int = 0
+var away_score: int = 0
 var _inning_reset_pending: bool = false
 
 
@@ -75,9 +78,8 @@ func _on_play_state_changed(new_state: PlayState) -> void:
 
 
 func _on_ball_caught(_fielder: Node3D, _ball: RigidBody3D) -> void:
-	outs += 1
-	print("Out ", outs)
-	outs_changed.emit(outs)
+	_record_out()
+	reset_count()
 	_set_play_state(PlayState.DEAD)
 
 
@@ -118,7 +120,10 @@ func commit_advancement(batter: BatterData) -> void:
 		return
 
 	if bases[2] != null:
-		score += 1
+		if is_home_batting:
+			home_score += 1
+		else:
+			away_score += 1
 	bases[2] = bases[1]
 	bases[1] = bases[0]
 	bases[0] = batter
@@ -126,9 +131,17 @@ func commit_advancement(batter: BatterData) -> void:
 		_format_base_entry(bases[0]),
 		_format_base_entry(bases[1]),
 		_format_base_entry(bases[2]),
-		score,
+		current_team_score(),
 	])
 	bases_changed.emit()
+
+
+func current_team_name() -> String:
+	return home_team_name if is_home_batting else away_team_name
+
+
+func current_team_score() -> int:
+	return home_score if is_home_batting else away_score
 
 
 func _format_base_entry(batter: BatterData) -> String:
@@ -139,23 +152,30 @@ func _format_base_entry(batter: BatterData) -> String:
 
 func _strikeout():
 	print("Strikeout")
-	outs += 1
-	print("Out ", outs)
-	outs_changed.emit(outs)
+	_record_out()
 	# Emit before resetting so listeners can tell the at-bat ended.
 	strikeout.emit()
 	reset_count()
-	if outs >= 3:
-		_end_inning()
 
 
-func _end_inning() -> void:
-	print("Inning ended")
-	inning += 1
-	inning_changed.emit(inning)
+func _record_out() -> void:
+	outs += 1
+	print("Out ", outs)
+	outs_changed.emit(outs)
+	if outs == 3:
+		_end_half_inning()
+
+
+func _end_half_inning() -> void:
+	print("Half-inning ended")
 	bases = [null, null, null]
 	bases_changed.emit()
 	_inning_reset_pending = true
+	if not is_home_batting:
+		inning += 1
+		inning_changed.emit(inning)
+	is_home_batting = not is_home_batting
+	batting_team_changed.emit()
 
 
 func _walk():
