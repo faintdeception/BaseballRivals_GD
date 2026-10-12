@@ -2,7 +2,11 @@ extends Node
 
 signal count_changed(balls: int, strikes: int)
 signal strikeout
+signal play_state_changed(new_state)
 
+enum PlayState { IDLE, LIVE, DEAD }
+
+var play_state: PlayState = PlayState.IDLE
 var balls: int = 0
 var strikes: int = 0
 var outs: int = 0
@@ -10,12 +14,43 @@ var current_batter_index: int = 0
 
 
 func _ready() -> void:
+	EventBus.ball_hit.connect(_on_ball_hit)
 	EventBus.ball_caught.connect(_on_ball_caught)
+	strikeout.connect(_on_strikeout)
+	play_state_changed.connect(_on_play_state_changed)
+
+
+func _on_ball_hit(_ball: RigidBody3D) -> void:
+	_set_play_state(PlayState.LIVE)
+
+
+func _on_strikeout() -> void:
+	_set_play_state(PlayState.DEAD)
+
+
+func _set_play_state(new_state: PlayState) -> void:
+	if play_state == new_state:
+		return
+	play_state = new_state
+	play_state_changed.emit(new_state)
+
+
+func _on_play_state_changed(new_state: PlayState) -> void:
+	if new_state != PlayState.DEAD:
+		return
+	await get_tree().create_timer(1.5).timeout
+	if play_state != PlayState.DEAD:
+		return
+	advance_batter()
+	var error := get_tree().change_scene_to_file("res://gameplay/ui/transition.tscn")
+	if error != OK:
+		push_error("Failed to change to transition scene: %s" % error)
 
 
 func _on_ball_caught(_fielder: Node3D, _ball: RigidBody3D) -> void:
 	outs += 1
 	print("Out ", outs)
+	_set_play_state(PlayState.DEAD)
 
 
 func reset_count():
@@ -51,9 +86,6 @@ func _strikeout():
 	# Emit before resetting so listeners can tell the at-bat ended.
 	strikeout.emit()
 	reset_count()
-	await get_tree().create_timer(1.5).timeout
-	advance_batter()
-	get_tree().change_scene_to_file("res://gameplay/ui/transition.tscn")
 
 
 func _walk():

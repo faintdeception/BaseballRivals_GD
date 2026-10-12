@@ -58,10 +58,11 @@ func _on_ball_pitched(_ball: RigidBody3D) -> void:
 func _physics_process(_delta: float) -> void:
 	if baseball == null:
 		return
-	# A reset ball (e.g. debug hit re-launch) means a new play: back to the batter.
-	if baseball.freeze:
+	if GameState.play_state == GameState.PlayState.DEAD:
 		if state != CameraState.BATTER_CAM:
 			_set_state(CameraState.BATTER_CAM)
+		return
+	if baseball.freeze:
 		return
 	if state == CameraState.FIELDING_CAM:
 		return
