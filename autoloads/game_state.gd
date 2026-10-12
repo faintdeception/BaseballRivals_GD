@@ -18,6 +18,7 @@ var lineup: Array[BatterData] = []
 var lineup_index: int = 0
 var bases: Array[BatterData] = [null, null, null]
 var score: int = 0
+var _inning_reset_pending: bool = false
 
 
 func _ready() -> void:
@@ -43,6 +44,10 @@ func end_play() -> void:
 
 func start_at_bat() -> void:
 	_set_play_state(PlayState.IDLE)
+	if _inning_reset_pending:
+		outs = 0
+		_inning_reset_pending = false
+		outs_changed.emit(outs)
 
 
 func _set_play_state(new_state: PlayState) -> void:
@@ -130,9 +135,21 @@ func _format_base_entry(batter: BatterData) -> String:
 
 func _strikeout():
 	print("Strikeout")
+	outs += 1
+	print("Out ", outs)
+	outs_changed.emit(outs)
 	# Emit before resetting so listeners can tell the at-bat ended.
 	strikeout.emit()
 	reset_count()
+	if outs >= 3:
+		_end_inning()
+
+
+func _end_inning() -> void:
+	print("Inning ended")
+	bases = [null, null, null]
+	bases_changed.emit()
+	_inning_reset_pending = true
 
 
 func _walk():
