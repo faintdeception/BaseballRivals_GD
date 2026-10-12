@@ -36,6 +36,10 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = "0"
 
+[node name="InningLabel" type="Label" parent="PanelContainer/HBoxContainer"]
+layout_mode = 2
+text = "INN:1"
+
 [node name="BallsLabel" type="Label" parent="PanelContainer/HBoxContainer"]
 layout_mode = 2
 text = "B:0"
