@@ -16,6 +16,8 @@ enum State { WAITING, WINDUP, PITCHING, DONE }
 @export var batter: Node3D
 ## Keeps pitches this far (m) inside the zone edges.
 @export var target_margin: float = 0.03
+@export var aim_error: float = 0.3
+@export var fast_mode: bool = false
 
 signal windup_started
 ## The next target is chosen and shown; UI should be at full strength.
@@ -28,11 +30,19 @@ var _target_revealed := true
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	if fast_mode:
+		wait_time = 0.5
+		time_between_pitches = 0.5
+		windup_time = 0.2
+		reveal_lead_time = 0.2
+		GameState.fast_mode = true
 	timer = wait_time
 	GameState.strikeout.connect(_on_strikeout)
+	GameState.walk.connect(_on_walk)
 	baseball.reset_to(release_point.global_position)
 	# The batter's data isn't loaded until after this _ready, so pick the first target next frame.
 	_pick_initial_target.call_deferred()
+
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -86,6 +96,10 @@ func _on_strikeout():
 	state = State.DONE
 
 
+func _on_walk():
+	state = State.DONE
+
+
 # Works out the velocity that makes the ball cross target_point, accounting for gravity.
 func _aim_at_target() -> Vector3:
 	var to_target = target_point - release_point.global_position
@@ -110,7 +124,11 @@ func _pick_target() -> Vector3:
 	var center := zone.get_center()
 	var half_x := maxf(zone.size.x * 0.5 - target_margin, 0.0)
 	var half_y := maxf(zone.size.y * 0.5 - target_margin, 0.0)
-	return Vector3(
+	var target := Vector3(
 		center.x + randf_range(-half_x, half_x),
 		center.y + randf_range(-half_y, half_y),
 		center.z)
+	target.x += randf_range(-aim_error, aim_error)
+	target.y += randf_range(-aim_error, aim_error)
+	return target
+

@@ -12,3 +12,5 @@ swing_radius_y = 0.0
 contact_center_y = 0.75
 contact_speed = 30.0
 swing_trigger_z = 3.0
+swing_aggression = 1.0
+patient = false

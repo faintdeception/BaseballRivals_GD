@@ -3,6 +3,7 @@ extends Node
 signal balls_changed(new_balls: int)
 signal strikes_changed(new_strikes: int)
 signal strikeout
+signal walk
 signal play_state_changed(new_state)
 signal bases_changed
 signal outs_changed(new_outs: int)
@@ -26,7 +27,10 @@ var lineup_index: int = 0
 var bases: Array[BatterData] = [null, null, null]
 var home_score: int = 0
 var away_score: int = 0
+var fast_mode: bool = false
 var _inning_reset_pending: bool = false
+var _lineup_advanced: bool = false
+
 
 
 func _ready() -> void:
@@ -51,6 +55,7 @@ func end_play() -> void:
 
 
 func start_at_bat() -> void:
+	_lineup_advanced = false
 	_set_play_state(PlayState.IDLE)
 	if _inning_reset_pending:
 		outs = 0
@@ -68,13 +73,15 @@ func _set_play_state(new_state: PlayState) -> void:
 func _on_play_state_changed(new_state: PlayState) -> void:
 	if new_state != PlayState.DEAD:
 		return
-	await get_tree().create_timer(1.5).timeout
+	var delay := 0.2 if fast_mode else 1.5
+	await get_tree().create_timer(delay).timeout
 	if play_state != PlayState.DEAD:
 		return
 	advance_batter()
 	var error := get_tree().change_scene_to_file("res://gameplay/ui/transition.tscn")
 	if error != OK:
 		push_error("Failed to change to transition scene: %s" % error)
+
 
 
 func _on_ball_caught(_fielder: Node3D, _ball: RigidBody3D) -> void:
@@ -107,14 +114,17 @@ func record_ball():
 
 
 func advance_batter():
-	advance_lineup()
+	if not _lineup_advanced:
+		advance_lineup()
 
 
 func advance_lineup():
 	lineup_index = (lineup_index + 1) % lineup.size()
+	_lineup_advanced = true
 
 
 func commit_advancement(batter: BatterData) -> void:
+
 	if batter == null:
 		push_error("GameState: cannot commit advancement without BatterData")
 		return
@@ -180,4 +190,11 @@ func _end_half_inning() -> void:
 
 func _walk():
 	print("Walk")
+	var batter_data: BatterData = lineup[lineup_index] if lineup_index >= 0 and lineup_index < lineup.size() else null
+	if batter_data != null:
+		commit_advancement(batter_data)
 	reset_count()
+	advance_lineup()
+	walk.emit()
+	end_play()
+

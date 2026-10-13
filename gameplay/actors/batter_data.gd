@@ -16,3 +16,7 @@ extends Resource
 @export var zone_half_width: float = 0.22
 @export var zone_bottom_y: float = 0.5
 @export var zone_top_y: float = 1.05
+## 0 = never swings, 1 = always swings (at anything)
+@export var swing_aggression: float = 1.0
+## If true, only swings at pitches predicted to land in the zone
+@export var patient: bool = false

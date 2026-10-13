@@ -13,3 +13,5 @@ contact_center_y = 0.75
 contact_speed = 30.0
 swing_trigger_z = 3.0
 launch_angle_degrees = 30.0
+swing_aggression = 1.0
+patient = true
