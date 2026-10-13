@@ -2,12 +2,35 @@ extends Control
 
 @export var batter_cam: Camera3D
 @export var batter: Node3D
+@export var pitcher: Node3D
+@export var dimmed_alpha: float = 0.3
+@export var fade_time: float = 0.2
 @export var fill_color: Color = Color(1, 1, 1, 0.15)
 @export var outline_color: Color = Color(1, 1, 1, 0.9)
 @export var outline_width: float = 2.0
 
 var _rect := Rect2()
 var _visible_zone := false
+var _fade_tween: Tween
+
+
+func _ready() -> void:
+	if pitcher:
+		pitcher.windup_started.connect(_fade_to.bind(dimmed_alpha))
+		pitcher.pitch_ready.connect(_fade_to.bind(1.0))
+	GameState.play_state_changed.connect(_on_play_state_changed)
+
+
+func _on_play_state_changed(new_state) -> void:
+	if new_state == GameState.PlayState.DEAD:
+		_fade_to(1.0)
+
+
+func _fade_to(alpha: float) -> void:
+	if _fade_tween:
+		_fade_tween.kill()
+	_fade_tween = create_tween()
+	_fade_tween.tween_property(self, "modulate:a", alpha, fade_time)
 
 
 func _process(_delta: float) -> void:

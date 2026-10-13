@@ -1,11 +1,15 @@
 extends Node3D
 
-enum State { WAITING, PITCHING, DONE }
+enum State { WAITING, WINDUP, PITCHING, DONE }
 
 @export var release_point: Node3D
 @export var wait_time: float = 3.0
 @export var pitch_speed: float = 40.0
 @export var time_between_pitches: float = 2.0
+## Delay between windup_started and the ball release.
+@export var windup_time: float = 0.7
+## How long before the windup the next target is revealed.
+@export var reveal_lead_time: float = 1.0
 # World position the pitch should cross: over the middle of home plate, mid strike zone.
 @export var target_point: Vector3 = Vector3(0, 0.75, 0)
 @export var baseball: RigidBody3D
@@ -13,10 +17,14 @@ enum State { WAITING, PITCHING, DONE }
 ## Keeps pitches this far (m) inside the zone edges.
 @export var target_margin: float = 0.03
 
+signal windup_started
+## The next target is chosen and shown; UI should be at full strength.
+signal pitch_ready
 signal ball_pitched(ball: RigidBody3D)
 
 var state = State.WAITING
 var timer = 0.0
+var _target_revealed := true
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -34,17 +42,32 @@ func _process(delta):
 	match state:
 		State.WAITING:
 			timer -= delta
+			if not _target_revealed and timer <= reveal_lead_time:
+				_target_revealed = true
+				target_point = _pick_target()
+				pitch_ready.emit()
+			if timer <= 0.0:
+				_start_windup()
+		State.WINDUP:
+			timer -= delta
 			if timer <= 0.0:
 				_start_pitch()
 		State.PITCHING:
 			pass #nothing to do yet
 
 
+func _start_windup():
+	if GameState.play_state != GameState.PlayState.IDLE:
+		return
+	state = State.WINDUP
+	timer = windup_time
+	windup_started.emit()
+
+
 func _start_pitch():
 	if GameState.play_state != GameState.PlayState.IDLE:
 		return
 	state = State.PITCHING
-	target_point = _pick_target()
 	# TODO: windup animation
 	#var ball = ball_scene.instantiate()
 	#get_tree().current_scene.add_child(ball)
@@ -54,6 +77,7 @@ func _start_pitch():
 
 	# Get ready for the next pitch first, because a strikeout below sets DONE.
 	timer = time_between_pitches
+	_target_revealed = false
 	state = State.WAITING
 	# Strikes are now recorded by the batter (whiff); a strike zone/umpire will handle takes later.
 

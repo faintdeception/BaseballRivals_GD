@@ -242,9 +242,10 @@ baseball = NodePath("../Actors/Baseball")
 
 [node name="StrikeZone" parent="." instance=ExtResource("14_strikezone")]
 
-[node name="Zone" parent="StrikeZone" index="0" node_paths=PackedStringArray("batter_cam", "batter")]
+[node name="Zone" parent="StrikeZone" index="0" node_paths=PackedStringArray("batter_cam", "batter", "pitcher")]
 batter_cam = NodePath("../../Cameras/BatterCam")
 batter = NodePath("../../Actors/Batter")
+pitcher = NodePath("../../Actors/Pitcher")
 
 [node name="PitchReticle" parent="UI" node_paths=PackedStringArray("pitcher", "batter_cam") instance=ExtResource("15_reticle")]
 pitcher = NodePath("../../Actors/Pitcher")

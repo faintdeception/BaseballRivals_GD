@@ -5,8 +5,8 @@ Source: game designer handoff. Recorded-clip/screenshot deliverables are ignored
 ## Status
 
 - [x] Stage 1 — Strike zone data + visual (verified in-game)
-- [~] Stage 2 — CPU pitcher targeting + reticle (implemented; needs in-game check)
-- [ ] Stage 3 — Fade behavior
+- [x] Stage 2 — CPU pitcher targeting + reticle (verified in-game)
+- [~] Stage 3 — Fade behavior (implemented; needs in-game check)
 
 ## Stage 1 — Strike zone data + visual
 
@@ -79,3 +79,5 @@ func get_strike_zone() -> AABB:
 
 - Stage 1: `get_strike_zone()` offsets by `plate_position` so the zone stays at the plate while the batter runs. Overlay hides when BatterCam isn't current (fielding cam) or any corner is behind the camera. `StrikeZone` instance added to `gameplay.tscn`. Batter `.tres` files don't set the zone fields yet, so they use script defaults; add `zone_*` lines to a `.tres` to override. Headless load shows no script errors.
 - Stage 2: `pitcher.gd` has `batter` + `target_margin` (0.03 m) exports; `_pick_target()` picks uniformly inside the zone (z = zone center). First target is picked deferred in `_ready` because Batter's `data` loads after Pitcher's `_ready`; each `_start_pitch` picks a new one. `pitch_reticle.tscn` (Control, under `UI`) projects `target_point`; hidden when BatterCam isn't current. Open item for Stage 3: the target changes at launch, so the reticle shows the previous pitch's spot until then — Stage 3 should pick the target at `windup_started` (reticle is hidden then) or earlier.
+
+- Stage 3: added Pitcher WINDUP state (windup_time 0.7s) and windup_started signal. No ball_dead signal exists, so UI resets on GameState.play_state_changed(DEAD). Target is now picked reveal_lead_time (1.0s) before the windup and announced via new pitch_ready signal; zone/reticle return to full alpha then, dim/hide on windup_started. Pitcher wired into StrikeZone/Zone.
