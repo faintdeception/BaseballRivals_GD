@@ -14,6 +14,7 @@
 [ext_resource type="Script" path="res://gameplay/directors/base_manager.gd" id="12_basemanager"]
 [ext_resource type="PackedScene" path="res://gameplay/ui/score_hud.tscn" id="13_scorehud"]
 [ext_resource type="PackedScene" path="res://gameplay/ui/strike_zone.tscn" id="14_strikezone"]
+[ext_resource type="PackedScene" path="res://gameplay/ui/pitch_reticle.tscn" id="15_reticle"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aunk2"]
 albedo_color = Color(0.301783, 0.651574, 0, 1)
@@ -148,12 +149,13 @@ mesh = SubResource("PlaneMesh_shadow")
 script = ExtResource("8_ballshadow")
 baseball = NodePath("../Baseball")
 
-[node name="Pitcher" type="MeshInstance3D" parent="Actors" node_paths=PackedStringArray("release_point", "baseball")]
+[node name="Pitcher" type="MeshInstance3D" parent="Actors" node_paths=PackedStringArray("release_point", "baseball", "batter")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.86226, 18.44)
 mesh = SubResource("BoxMesh_51ld1")
 script = ExtResource("2_u447v")
 release_point = NodePath("ReleasePoint")
 baseball = NodePath("../Baseball")
+batter = NodePath("../Batter")
 
 [node name="ReleasePoint" type="Node3D" parent="Actors/Pitcher"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0)
@@ -243,3 +245,7 @@ baseball = NodePath("../Actors/Baseball")
 [node name="Zone" parent="StrikeZone" index="0" node_paths=PackedStringArray("batter_cam", "batter")]
 batter_cam = NodePath("../../Cameras/BatterCam")
 batter = NodePath("../../Actors/Batter")
+
+[node name="PitchReticle" parent="UI" node_paths=PackedStringArray("pitcher", "batter_cam") instance=ExtResource("15_reticle")]
+pitcher = NodePath("../../Actors/Pitcher")
+batter_cam = NodePath("../../Cameras/BatterCam")

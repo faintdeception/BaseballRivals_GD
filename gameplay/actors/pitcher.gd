@@ -9,6 +9,9 @@ enum State { WAITING, PITCHING, DONE }
 # World position the pitch should cross: over the middle of home plate, mid strike zone.
 @export var target_point: Vector3 = Vector3(0, 0.75, 0)
 @export var baseball: RigidBody3D
+@export var batter: Node3D
+## Keeps pitches this far (m) inside the zone edges.
+@export var target_margin: float = 0.03
 
 signal ball_pitched(ball: RigidBody3D)
 
@@ -20,6 +23,8 @@ func _ready():
 	timer = wait_time
 	GameState.strikeout.connect(_on_strikeout)
 	baseball.reset_to(release_point.global_position)
+	# The batter's data isn't loaded until after this _ready, so pick the first target next frame.
+	_pick_initial_target.call_deferred()
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -39,6 +44,7 @@ func _start_pitch():
 	if GameState.play_state != GameState.PlayState.IDLE:
 		return
 	state = State.PITCHING
+	target_point = _pick_target()
 	# TODO: windup animation
 	#var ball = ball_scene.instantiate()
 	#get_tree().current_scene.add_child(ball)
@@ -67,3 +73,20 @@ func _aim_at_target() -> Vector3:
 	# The ball falls 0.5 * g * t^2 on the way, so aim that much higher.
 	velocity.y = (to_target.y + 0.5 * gravity * flight_time * flight_time) / flight_time
 	return velocity
+
+func _pick_initial_target() -> void:
+	target_point = _pick_target()
+
+
+# Random point inside the batter's strike zone, kept target_margin away from the edges.
+func _pick_target() -> Vector3:
+	if batter == null or not batter.has_method("get_strike_zone") or batter.data == null:
+		return target_point
+	var zone: AABB = batter.get_strike_zone()
+	var center := zone.get_center()
+	var half_x := maxf(zone.size.x * 0.5 - target_margin, 0.0)
+	var half_y := maxf(zone.size.y * 0.5 - target_margin, 0.0)
+	return Vector3(
+		center.x + randf_range(-half_x, half_x),
+		center.y + randf_range(-half_y, half_y),
+		center.z)
