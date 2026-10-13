@@ -7,9 +7,11 @@ signal walk
 signal play_state_changed(new_state)
 signal bases_changed
 signal outs_changed(new_outs: int)
-signal inning_changed(new_inning: int)
+signal inning_changed(inning: int, half: Half)
 signal batting_team_changed
+signal game_over
 
+enum Half { TOP, BOTTOM }
 enum PlayState { IDLE, LIVE, DEAD }
 
 var play_state: PlayState = PlayState.IDLE
@@ -17,9 +19,10 @@ var balls: int = 0
 var strikes: int = 0
 var outs: int = 0
 var inning: int = 1
+var half: Half = Half.TOP
 var home_team_name: String = "HOME"
 var away_team_name: String = "AWAY"
-var is_home_batting: bool = true
+var is_home_batting: bool = false
 const LINEUP_SIZE := 9
 
 var lineup: Array[BatterData] = []
@@ -27,6 +30,20 @@ var lineup_index: int = 0
 var bases: Array[BatterData] = [null, null, null]
 var home_score: int = 0
 var away_score: int = 0
+
+var score_home: int:
+	get:
+		return home_score
+	set(value):
+		home_score = value
+
+var score_away: int:
+	get:
+		return away_score
+	set(value):
+		away_score = value
+
+var is_game_over: bool = false
 var fast_mode: bool = false
 var _inning_reset_pending: bool = false
 var _lineup_advanced: bool = false
@@ -76,6 +93,8 @@ func _on_play_state_changed(new_state: PlayState) -> void:
 	var delay := 0.2 if fast_mode else 1.5
 	await get_tree().create_timer(delay).timeout
 	if play_state != PlayState.DEAD:
+		return
+	if is_game_over:
 		return
 	advance_batter()
 	var error := get_tree().change_scene_to_file("res://gameplay/ui/transition.tscn")
@@ -173,19 +192,78 @@ func _record_out() -> void:
 	print("Out ", outs)
 	outs_changed.emit(outs)
 	if outs == 3:
-		_end_half_inning()
+		end_half_inning()
 
 
-func _end_half_inning() -> void:
+func end_half_inning() -> void:
 	print("Half-inning ended")
 	bases = [null, null, null]
 	bases_changed.emit()
 	_inning_reset_pending = true
-	if not is_home_batting:
+
+	if _check_game_over():
+		is_game_over = true
+		game_over.emit()
+		return
+
+	if half == Half.TOP:
+		half = Half.BOTTOM
+	else:
+		half = Half.TOP
 		inning += 1
-		inning_changed.emit(inning)
-	is_home_batting = not is_home_batting
+
+	is_home_batting = (half == Half.BOTTOM)
 	batting_team_changed.emit()
+	inning_changed.emit(inning, half)
+
+
+func _end_half_inning() -> void:
+	end_half_inning()
+
+
+func _check_game_over() -> bool:
+	if inning < 9:
+		return false
+	if half == Half.TOP:
+		return score_home > score_away
+	else:
+		return score_home != score_away  # tie → extra innings
+
+
+func check_game_over() -> bool:
+	return _check_game_over()
+
+
+func get_game_over_text() -> String:
+	if score_home > score_away:
+		return "%s WINS %d-%d" % [home_team_name, score_home, score_away]
+	elif score_away > score_home:
+		return "%s WINS %d-%d" % [away_team_name, score_away, score_home]
+	else:
+		return "TIE GAME %d-%d" % [score_home, score_away]
+
+
+func reset() -> void:
+	play_state = PlayState.IDLE
+	balls = 0
+	strikes = 0
+	outs = 0
+	inning = 1
+	half = Half.TOP
+	is_home_batting = false
+	lineup_index = 0
+	bases = [null, null, null]
+	home_score = 0
+	away_score = 0
+	is_game_over = false
+	_inning_reset_pending = false
+	_lineup_advanced = false
+	balls_changed.emit(balls)
+	strikes_changed.emit(strikes)
+	outs_changed.emit(outs)
+	bases_changed.emit()
+	batting_team_changed.emit()
+	inning_changed.emit(inning, half)
 
 
 func _walk():

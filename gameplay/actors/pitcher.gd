@@ -39,6 +39,7 @@ func _ready():
 	timer = wait_time
 	GameState.strikeout.connect(_on_strikeout)
 	GameState.walk.connect(_on_walk)
+	GameState.game_over.connect(_on_game_over)
 	baseball.reset_to(release_point.global_position)
 	# The batter's data isn't loaded until after this _ready, so pick the first target next frame.
 	_pick_initial_target.call_deferred()
@@ -98,6 +99,15 @@ func _on_strikeout():
 
 func _on_walk():
 	state = State.DONE
+
+
+func _on_game_over():
+	stop()
+
+
+func stop():
+	state = State.DONE
+	set_process(false)
 
 
 # Works out the velocity that makes the ball cross target_point, accounting for gravity.

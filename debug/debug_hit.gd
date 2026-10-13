@@ -21,6 +21,8 @@ extends Node
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if GameState.is_game_over:
+		return
 	if not (event is InputEventKey and event.pressed and not event.echo):
 		return
 	match event.physical_keycode:

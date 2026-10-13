@@ -44,6 +44,7 @@ func _ready():
 	pitcher.ball_pitched.connect(_on_ball_pitched)
 	EventBus.ball_hit.connect(_on_ball_hit)
 	EventBus.ball_caught.connect(_on_ball_caught)
+	GameState.game_over.connect(_on_game_over)
 	bat_pivot.rotation_degrees.y = bat_ready_angle
 	if baseball:
 		_prev_ball_pos = baseball.global_position
@@ -122,6 +123,8 @@ func _animate_swing():
 func _physics_process(_delta):
 	if GameState.play_state != GameState.PlayState.IDLE:
 		return
+	if GameState.is_game_over:
+		return
 	if baseball == null or baseball.freeze or not _pitch_in_flight:
 		return
 	if data == null:
@@ -195,4 +198,15 @@ func get_strike_zone() -> AABB:
 		plate_position + Vector3(-data.zone_half_width, data.zone_bottom_y, -0.1),
 		Vector3(data.zone_half_width * 2.0, data.zone_top_y - data.zone_bottom_y, 0.2)
 	)
+
+
+func _on_game_over() -> void:
+	disable_input()
+
+
+func disable_input() -> void:
+	set_physics_process(false)
+	set_process_unhandled_input(false)
+	set_process_input(false)
+
 

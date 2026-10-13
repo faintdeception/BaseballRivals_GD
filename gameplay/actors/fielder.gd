@@ -76,6 +76,8 @@ func _physics_process(delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if GameState.is_game_over:
+		return
 	if not (is_player_controlled and has_ball):
 		return
 	var target: Node3D = null
@@ -100,6 +102,9 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _move() -> void:
+	if GameState.is_game_over:
+		velocity = Vector3.ZERO
+		return
 	var input := Vector2.ZERO
 	if is_player_controlled:
 		input.x = _axis(KEY_D, KEY_RIGHT, KEY_A, KEY_LEFT)
